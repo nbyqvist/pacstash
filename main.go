@@ -68,8 +68,16 @@ func main() {
 			}
 		} else {
 			// Proxy request upstream
-			fmt.Println("Cannot cache package")
-			return c.SendString("asdf")
+			mirrors, err := GetMirrorsForUpstreamID(db, upstream.ID)
+			if err != nil {
+				return err
+			}
+			pkg, _, err := FetchPackage(mirrors, arch, repo, filename)
+			if err != nil {
+				return err
+			}
+			c.Set("Content-Type", "application/octet-stream")
+			return c.Send(pkg)
 		}
 	})
 

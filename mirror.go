@@ -41,7 +41,7 @@ func GetMirrorsForUpstreamID(db *sql.DB, upstreamId int) ([]UpstreamMirror, erro
 		mirrors = append(mirrors, mirror)
 	}
 	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("albumsByArtist %q: %v", upstreamId, err)
+		return nil, fmt.Errorf("GetMirrorsForUpstreamID %q: %v", upstreamId, err)
 	}
 
 	return mirrors, nil
