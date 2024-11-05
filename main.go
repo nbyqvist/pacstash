@@ -64,6 +64,10 @@ func main() {
 				return c.Send(pkg)
 			} else {
 				// Cache hit
+				err := UpdatePackageStatistics(db, upstreamName, arch, repo, filename)
+				if err != nil {
+					return err
+				}
 				return c.SendFile(fsCacheMan.PathOfCachedPackage(upstreamName, cachedPackage))
 			}
 		} else {
