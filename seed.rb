@@ -20,7 +20,7 @@ Dir.glob(mirrorlist_glob).each do |mirrorlist_file|
   upstream_id = db.execute('select id from upstreams where name = ?', upstream_name).map { |row| row[0] }
   known_mirrors = db.execute('select url from upstream_mirrors where upstream_id = ?', [upstream_id]).map { |row| row[0] }
 
-  mirrors = File.readlines(mirrorlist_file).filter { |l| !l.include?('#') && l.include?('Server = ') }.map { |l| l.gsub('Server = ', '')}
+  mirrors = File.readlines(mirrorlist_file).filter { |l| !l.include?('#') && !l.include?('CacheServer') && l.include?('Server = ') }.map { |l| l.gsub('Server = ', '')}
   mirrors.each do |mir|
     unless known_mirrors.include?(mir)
         db.execute('insert into upstream_mirrors (upstream_id, url) values (?, ?)', [upstream_id, mir.chomp])
