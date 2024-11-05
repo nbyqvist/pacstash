@@ -4,13 +4,19 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"os"
 
 	_ "github.com/glebarez/go-sqlite"
 	"github.com/gofiber/fiber/v2"
 )
 
 func main() {
-	db, err := sql.Open("sqlite", "dev.db")
+	dbFile := os.Getenv("DATABASE_URL")
+	webPort := os.Getenv("WEB_PORT")
+	webHost := os.Getenv("WEB_HOST")
+	cacheRoot := os.Getenv("CACHE_ROOT")
+
+	db, err := sql.Open("sqlite", dbFile)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -18,7 +24,7 @@ func main() {
 	fmt.Println("Starting up pacstash...")
 
 	fsCacheMan := FilesystemCacheManager{
-		RootPath: "./fake_cache",
+		RootPath: cacheRoot,
 	}
 	app := fiber.New()
 
@@ -85,5 +91,7 @@ func main() {
 		}
 	})
 
-	log.Fatal(app.Listen("0.0.0.0:3000"))
+	webListenAddr := fmt.Sprintf("%s:%s", webHost, webPort)
+
+	log.Fatal(app.Listen(webListenAddr))
 }

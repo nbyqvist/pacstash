@@ -8,7 +8,7 @@ import (
 )
 
 func FetchPackage(mirrors []UpstreamMirror, arch string, repo string, filename string) ([]byte, int, error) {
-	// Ideally the mirrors would be ranked, but meh
+	// Ideally the mirrors would be ranked or randomized
 	for _, mirror := range mirrors {
 		mirrorUrl := fmt.Sprintf("%s/%s", mirror.SubstituteUrlParams(arch, repo), filename)
 		resp, err := http.Get(mirrorUrl)
