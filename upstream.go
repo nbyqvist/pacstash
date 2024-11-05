@@ -11,7 +11,7 @@ type Upstream struct {
 }
 
 func FindUpstreamByName(db *sql.DB, name string) (Upstream, error) {
-	findStmt, err := db.Prepare("select id, name, upstream_id, created_at, updated_at from upstreams where name = ? limit 1")
+	findStmt, err := db.Prepare("select id, name, upstream_type, created_at, updated_at from upstreams where name = ? limit 1")
 	if err != nil {
 		return Upstream{}, err
 	}

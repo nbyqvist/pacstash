@@ -1,1 +1,4 @@
 dev.db
+fake_cache/
+dev.db*
+pacstash

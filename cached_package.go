@@ -21,9 +21,23 @@ func FindCachedPackage(db *sql.DB, upstreamId int, repo string, arch string, fil
 
 	cachedPackageRow := findPkgStmt.QueryRow(upstreamId, repo, arch, filename)
 	var c CachedPackage
-	if err = cachedPackageRow.Scan(&c.ID, &c.UpstreamID, &c.Repo, &c.Arch, &c.Filename, &c.CreatedAt, &c.UpdatedAt); err != nil {
+	if err = cachedPackageRow.Scan(&c.ID, &c.UpstreamID, &c.Repo, &c.Arch, &c.Filename, &c.UpstreamMirrorID, &c.CreatedAt, &c.UpdatedAt); err != nil {
 		return CachedPackage{}, err
 	}
 
 	return c, nil
+}
+
+func CreateCachedPackage(db *sql.DB, upstreamId int, upstreamMirrorId int, arch string, repo string, filename string) error {
+	insertPkgStmt, err := db.Prepare("insert into cached_packages (upstream_id, repo, arch, filename, upstream_mirror_id) values (?, ?, ?, ?, ?)")
+	if err != nil {
+		return err
+	}
+
+	_, err = insertPkgStmt.Exec(upstreamId, repo, arch, filename, upstreamMirrorId)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

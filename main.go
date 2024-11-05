@@ -43,13 +43,34 @@ func main() {
 				return err
 			} else if err == sql.ErrNoRows {
 				// Cache miss
+				mirrors, err := GetMirrorsForUpstreamID(db, upstream.ID)
+				if err != nil {
+					return err
+				}
+				pkg, mirrorId, err := FetchPackage(mirrors, arch, repo, filename)
+				if err != nil {
+					return err
+				}
+				err = CreateCachedPackage(db, upstream.ID, mirrorId, arch, repo, filename)
+				if err != nil {
+					return err
+				}
+
+				err = fsCacheMan.WriteFile(CacheEntry{Architecture: arch, Repository: repo, FileName: filename, UpstreamName: upstreamName}, pkg)
+				if err != nil {
+					return err
+				}
+				c.Set("Content-Type", "application/octet-stream")
+				return c.Send(pkg)
 			} else {
 				// Cache hit
 				return c.SendFile(fsCacheMan.PathOfCachedPackage(upstreamName, cachedPackage))
 			}
+		} else {
+			// Proxy request upstream
+			fmt.Println("Cannot cache package")
+			return c.SendString("asdf")
 		}
-
-		// Proxy request upstream
 	})
 
 	log.Fatal(app.Listen("0.0.0.0:3000"))

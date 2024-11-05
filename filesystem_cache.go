@@ -1,8 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"path"
+	"strings"
 )
 
 type CacheEntry struct {
@@ -28,7 +30,8 @@ func (f FilesystemCacheManager) ReadFile(entry CacheEntry) ([]byte, error) {
 
 func (f FilesystemCacheManager) WriteFile(entry CacheEntry, content []byte) error {
 	entryPath := path.Join(f.RootPath, entry.ToPath())
-	err := os.MkdirAll(entryPath, os.ModeDir)
+	entryBaseDir := strings.ReplaceAll(entryPath, fmt.Sprintf("/%s", entry.FileName), "")
+	err := os.MkdirAll(entryBaseDir, 0700)
 	if err != nil {
 		return err
 	}
