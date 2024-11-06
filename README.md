@@ -15,9 +15,9 @@ Use at your own risk.
     - `/etc/pacman.d/mirrorlist` -> arch
     - `/etc/pacman.d/cachyos-mirrorlist` -> cachyos
     - `/etc/pacman.d/cachyos-v3-mirrorlist` -> cachyosv3
-        - Replace $arch with $arch_v3
+        - Replace `$arch` with `$arch_v3`
     - `/etc/pacman.d/cachyos-v4-mirrorlist` -> cachyosv4
-        - Replace $arch with $arch_v4
+        - Replace `$arch` with `$arch_v4`
 
 ## Reasoning
 If you have more than 1 host running an arch based os, you have to download each package you want to update once for each host. This costs you internet bandwidth and costs the mirror hosts cpu-time and bandwidth. By downloading each requested package only once, we save ourself and the mirror hosts time and money.
