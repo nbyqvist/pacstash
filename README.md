@@ -9,6 +9,15 @@ Use at your own risk.
 - `sqlx migrate run`
 - `go build`
 - `DATABASE_URL=sqlite:dev.db WEB_PORT=3000 WEB_HOST=0.0.0.0 CACHE_ROOT=./fake_cache ./pacstash`
+- Then, in each mirrorlist file under `/etc/pacman.d/` add an entry like the following:
+- `CacheServer = http://pacstash-ip-or-url/u/$upstream-name/$repo/$arch`
+- For cachyOS the repos are named as following:
+    - `/etc/pacman.d/mirrorlist` -> arch
+    - `/etc/pacman.d/cachyos-mirrorlist` -> cachyos
+    - `/etc/pacman.d/cachyos-v3-mirrorlist` -> cachyosv3
+        - Replace $arch with $arch_v3
+    - `/etc/pacman.d/cachyos-v4-mirrorlist` -> cachyosv4
+        - Replace $arch with $arch_v4
 
 ## Reasoning
 If you have more than 1 host running an arch based os, you have to download each package you want to update once for each host. This costs you internet bandwidth and costs the mirror hosts cpu-time and bandwidth. By downloading each requested package only once, we save ourself and the mirror hosts time and money.
