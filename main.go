@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	dbFile := os.Getenv("DATABASE_URL")
+	dbFile := os.Getenv("DATABASE")
 	webPort := os.Getenv("WEB_PORT")
 	webHost := os.Getenv("WEB_HOST")
 	cacheRoot := os.Getenv("CACHE_ROOT")
