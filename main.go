@@ -8,6 +8,7 @@ import (
 
 	_ "github.com/glebarez/go-sqlite"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/template/html/v2"
 )
 
 func main() {
@@ -15,6 +16,8 @@ func main() {
 	webPort := os.Getenv("WEB_PORT")
 	webHost := os.Getenv("WEB_HOST")
 	cacheRoot := os.Getenv("CACHE_ROOT")
+
+	engine := html.New("./views", ".html")
 
 	db, err := sql.Open("sqlite", dbFile)
 	if err != nil {
@@ -26,10 +29,18 @@ func main() {
 	fsCacheMan := FilesystemCacheManager{
 		RootPath: cacheRoot,
 	}
-	app := fiber.New()
+	app := fiber.New(fiber.Config{
+		Views: engine,
+	})
 
 	app.Get("/", func(c *fiber.Ctx) error {
-		return c.SendString("pacstash. This will return stats")
+		stats, err := FetchPackageStatistics(db)
+		if err != nil {
+			return err
+		}
+		return c.Render("stats", fiber.Map{
+			"stats": stats,
+		})
 	})
 
 	app.Get("/u/:upstream_name/:repo/:arch/:filename", func(c *fiber.Ctx) error {
