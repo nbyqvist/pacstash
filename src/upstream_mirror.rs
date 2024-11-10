@@ -1,0 +1,38 @@
+use sqlx::SqliteConnection;
+
+pub struct UpstreamMirror {
+    pub id: i64,
+    pub upstream_id: i64,
+    pub url: String,
+    pub created_at: i64,
+    pub updated_at: Option<i64>,
+}
+
+pub async fn get_mirrors_for_upstream_id(
+    conn: &mut SqliteConnection,
+    upstream_id: i64,
+) -> anyhow::Result<Vec<UpstreamMirror>> {
+    let mirrors = sqlx::query!("select id, upstream_id, url, created_at, updated_at from upstream_mirrors where upstream_id = ?", upstream_id)
+    .fetch_all(conn).await?.iter().map(|row| {
+        UpstreamMirror {
+            id: row.id,
+            upstream_id: row.upstream_id,
+            url: row.url.clone(),
+            created_at: row.created_at,
+            updated_at: row.updated_at,
+        }
+    }).collect::<Vec<_>>();
+
+    Ok(mirrors)
+}
+
+pub fn should_cache_file(file: &String) -> bool {
+    !(file.ends_with(".sig") || file.ends_with(".db"))
+}
+
+pub fn substitute_url_params(url: String, arch: String, repo: String) -> String {
+    url.replace("$arch_v4", &arch)
+        .replace("$arch_v3", &arch)
+        .replace("$arch", &arch)
+        .replace("$repo", &repo)
+}

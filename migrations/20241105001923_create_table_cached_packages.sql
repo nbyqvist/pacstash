@@ -1,5 +1,5 @@
 create table cached_packages (
-    id integer primary key,
+    id integer primary key not null,
     upstream_id integer not null,
     -- $repo var from url
     repo text not null,

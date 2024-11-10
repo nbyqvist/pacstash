@@ -1,0 +1,21 @@
+[package]
+name = "pacstash"
+version = "0.0.1"
+edition = "2021"
+
+[dependencies]
+actix-web = "4"
+anyhow = "1"
+askama = "0.12.1"
+askama_actix = "0.14.0"
+env_logger = "0.11.5"
+log = "0.4.22"
+reqwest = { version = "0.12.9", default-features = false, features = ["charset", "rustls-tls"] }
+sqlx = { version = "0.8.2", default-features = false, features = [
+    "tls-none",
+    "macros",
+    "migrate",
+    "runtime-tokio",
+    "sqlite",
+] }
+tokio = { version = "1", features = ["full"] }

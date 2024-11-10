@@ -1,5 +1,5 @@
 create table upstream_mirrors (
-    id integer primary key,
+    id integer primary key not null,
     upstream_id integer not null,
     -- Url as present in *mirrorlist including $arch/$repo variables
     url text not null,

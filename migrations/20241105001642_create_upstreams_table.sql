@@ -1,5 +1,5 @@
 create table upstreams (
-    id integer primary key,
+    id integer primary key not null,
     -- `name` is the url param that the upstream will be accessed with
     name text not null unique,
     upstream_type text not null,
