@@ -1,5 +1,6 @@
-use sqlx::SqliteConnection;
+use sqlx::{prelude::FromRow, SqliteConnection};
 
+#[derive(FromRow)]
 pub struct UpstreamMirror {
     pub id: i64,
     pub upstream_id: i64,
@@ -12,16 +13,8 @@ pub async fn get_mirrors_for_upstream_id(
     conn: &mut SqliteConnection,
     upstream_id: i64,
 ) -> anyhow::Result<Vec<UpstreamMirror>> {
-    let mirrors = sqlx::query!("select id, upstream_id, url, created_at, updated_at from upstream_mirrors where upstream_id = ?", upstream_id)
-    .fetch_all(conn).await?.iter().map(|row| {
-        UpstreamMirror {
-            id: row.id,
-            upstream_id: row.upstream_id,
-            url: row.url.clone(),
-            created_at: row.created_at,
-            updated_at: row.updated_at,
-        }
-    }).collect::<Vec<_>>();
+    let mirrors = sqlx::query_as!(UpstreamMirror, "select id, upstream_id, url, created_at, updated_at from upstream_mirrors where upstream_id = ?", upstream_id)
+    .fetch_all(conn).await?;
 
     Ok(mirrors)
 }

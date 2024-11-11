@@ -4,17 +4,15 @@ use sqlx::SqliteConnection;
 #[derive(Template)]
 #[template(path = "statistics.html")]
 pub struct StatisticsTemplate {
-    pub stats: Vec<Statistics>,
+    pub stats: Vec<PackageCounts>,
 }
 
-pub struct Statistics {
+pub struct PackageCounts {
     upstream_name: String,
     package_count: i64,
 }
 
-pub async fn fetch_statistics(
-    conn: &mut SqliteConnection,
-) -> anyhow::Result<Vec<Statistics>> {
+pub async fn fetch_statistics(conn: &mut SqliteConnection) -> anyhow::Result<Vec<PackageCounts>> {
     let stats = sqlx::query!(
         "select
             u.name,
@@ -27,7 +25,7 @@ pub async fn fetch_statistics(
     .fetch_all(conn)
     .await?
     .into_iter()
-    .map(|row| Statistics {
+    .map(|row| PackageCounts {
         upstream_name: row.name,
         package_count: row.package_count,
     })

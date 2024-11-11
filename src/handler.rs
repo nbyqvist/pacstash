@@ -26,9 +26,9 @@ pub async fn statistics_page(pool: Data<SqlitePool>) -> impl Responder {
 pub async fn caching_package_endpoint(
     path: Path<(String, String, String, String)>,
     pool: Data<SqlitePool>,
-    cache_root_data: Data<AppState>,
+    app_state: Data<AppState>,
 ) -> AppResponse {
-    let cache_root = cache_root_data.into_inner().cache_root.clone();
+    let cache_root = app_state.into_inner().cache_root.clone();
     let (upstream_name, repo, arch, filename) = path.into_inner();
     let mut conn = pool.acquire().await?;
     let maybe_upstream = find_upstream_by_name(&mut conn, &upstream_name).await?;
@@ -78,7 +78,7 @@ pub async fn caching_package_endpoint(
 
     log::info!("Cache hit {filename}");
     let entry = cache_package_to_disk_entry(upstream.name, cached_pkg);
-    let pkg_path = path_of_cached_package(cache_root, entry);
+    let pkg_path = path_of_cached_package(&cache_root, &entry);
     let content = fs::read(std::path::Path::new(&pkg_path)).map_err(|e| anyhow::anyhow!(format!("{:?}", e)))?;
     Ok(HttpResponseBuilder::new(http::StatusCode::OK).insert_header((
         header::CONTENT_TYPE,

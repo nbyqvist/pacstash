@@ -37,11 +37,14 @@ async fn main() -> anyhow::Result<()> {
 
     HttpServer::new(move || {
         App::new()
-        .wrap(Logger::default())
+            .wrap(Logger::default())
             .service(statistics_page)
             .service(caching_package_endpoint)
             .app_data(Data::new(pool.clone()))
-            .app_data(Data::new(Arc::new(AppStateStruct{cache_root: cfg.cache_root.clone()})))
+            .app_data(Data::new(Arc::new(AppStateStruct {
+                cache_root: cfg.cache_root.clone(),
+                pkg_max_age: cfg.pkg_max_age,
+            })))
     })
     .bind((cfg.web_host, cfg.web_port))
     .expect("Could not bind address")
