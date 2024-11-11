@@ -7,7 +7,7 @@ Use at your own risk.
 ## Usage
 - `sqlx database create` (Only first run)
 - `sqlx migrate run`
-- `go build`
+- `cargo build`
 - `DATABASE_URL=sqlite:dev.db WEB_PORT=3000 WEB_HOST=0.0.0.0 CACHE_ROOT=./fake_cache ./pacstash`
 - Then, in each mirrorlist file under `/etc/pacman.d/` add an entry like the following:
 - `CacheServer = http://pacstash-ip-or-url/u/$upstream-name/$repo/$arch`
@@ -38,9 +38,14 @@ If you have more than 1 host running an arch based os, you have to download each
 - [ ] Interactive management page (Add/Modify/Del) Upstreams/Mirrors/Packages
 
 ## Libraries and Tools used
-- go@1.23 (Pacstash binary)
-    - fiber@v2 (Web framework)
-    - github.com/glebarez/go-sqlite
+- rust@1.84 (Pacstash binary)
+    - actix-web@4.9 (Web framework)
+    - anyhow (Error type coercion)
+    - askama (Html templates)
+    - env-logger + log (Logging)
+    - reqwest (Http client)
+    - sqlx (Database interface)
+    - tokio (async runtime)
 - ruby@3.3 (Seed script)
 - sqlite3 (Metadata database)
 - sqlx-cli (Database migration management)
