@@ -1,5 +1,6 @@
 use crate::upstream_mirror::{substitute_url_params, UpstreamMirror};
 use anyhow::anyhow;
+use reqwest::StatusCode;
 
 pub struct MirrorPackageFetch {
     pub mirror_id: i64,
@@ -17,6 +18,8 @@ pub async fn fetch_package(mirrors: Vec<UpstreamMirror>, arch: &String, repo: &S
         let package = reqwest::get(url.clone()).await;
         match package {
             Ok(response) => {
+                let status = response.status();
+                if status == StatusCode::OK {
                 let package = response.bytes().await?;
                 log::info!("Got package {} from mirror {}", filename, mirror.url);
                 return Ok(MirrorPackageFetch{
@@ -24,6 +27,11 @@ pub async fn fetch_package(mirrors: Vec<UpstreamMirror>, arch: &String, repo: &S
                     tried_mirrors: tried_mirror_ids.clone(),
                     package: package.to_vec(),
                 })
+                } else {
+                    // Bad response from mirror
+                    // In the future some stats for the mirror should be saved here
+                    log::warn!("Fetch({}) {}", status, url);
+                }
             },
             Err(e) => {
                 // Don't return yet, try next mirror
