@@ -9,7 +9,10 @@ pub struct Upstream {
     pub updated_at: Option<i64>,
 }
 
-pub async fn find_upstream_by_name(conn: &mut SqliteConnection, name: &String) -> anyhow::Result<Option<Upstream>> {
+pub async fn find_upstream_by_name(
+    conn: &mut SqliteConnection,
+    name: &String,
+) -> anyhow::Result<Option<Upstream>> {
     let upstream = sqlx::query_as!(Upstream, "select id, name, upstream_type, created_at, updated_at from upstreams where name = ? limit 1", name)
     .fetch_optional(conn).await?;
 

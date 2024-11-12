@@ -8,7 +8,12 @@ pub struct MirrorPackageFetch {
     pub package: Vec<u8>,
 }
 
-pub async fn fetch_package(mirrors: Vec<UpstreamMirror>, arch: &String, repo: &String, filename: &String) -> anyhow::Result<MirrorPackageFetch> {
+pub async fn fetch_package(
+    mirrors: Vec<UpstreamMirror>,
+    arch: &String,
+    repo: &String,
+    filename: &String,
+) -> anyhow::Result<MirrorPackageFetch> {
     // let mut tried_mirror_ids = vec![];
     log::info!("Fetching {repo}/{arch}/{filename}");
     for mirror in mirrors.iter() {
@@ -20,19 +25,19 @@ pub async fn fetch_package(mirrors: Vec<UpstreamMirror>, arch: &String, repo: &S
             Ok(response) => {
                 let status = response.status();
                 if status == StatusCode::OK {
-                let package = response.bytes().await?;
-                log::info!("Got package {} from mirror {}", filename, mirror.url);
-                return Ok(MirrorPackageFetch{
-                    mirror_id: mirror.id,
-                    // tried_mirrors: tried_mirror_ids.clone(),
-                    package: package.to_vec(),
-                })
+                    let package = response.bytes().await?;
+                    log::info!("Got package {} from mirror {}", filename, mirror.url);
+                    return Ok(MirrorPackageFetch {
+                        mirror_id: mirror.id,
+                        // tried_mirrors: tried_mirror_ids.clone(),
+                        package: package.to_vec(),
+                    });
                 } else {
                     // Bad response from mirror
                     // In the future some stats for the mirror should be saved here
                     log::warn!("Fetch({}) {}", status, url);
                 }
-            },
+            }
             Err(e) => {
                 // Don't return yet, try next mirror
                 log::warn!("Mirror {} failed to return package!", mirror.url);

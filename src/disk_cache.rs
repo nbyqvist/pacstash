@@ -45,10 +45,7 @@ pub fn write_cached_file(
     Ok(())
 }
 
-pub fn delete_cached_file(
-    cache_root: &String,
-    disk_entry: &DiskCacheEntry,
-) -> anyhow::Result<()> {
+pub fn delete_cached_file(cache_root: &String, disk_entry: &DiskCacheEntry) -> anyhow::Result<()> {
     let path = path_of_cached_package(cache_root, disk_entry);
     log::info!("Deleting path {}", path);
     fs::remove_file(path)?;

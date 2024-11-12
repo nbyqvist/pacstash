@@ -1,7 +1,10 @@
 use actix_web::web::Data;
 use sqlx::{pool::PoolConnection, FromRow, Sqlite, SqliteConnection};
 
-use crate::{disk_cache::{delete_cached_file, DiskCacheEntry}, state::AppState};
+use crate::{
+    disk_cache::{delete_cached_file, DiskCacheEntry},
+    state::AppState,
+};
 
 #[derive(FromRow)]
 pub struct CachedPackage {
@@ -98,7 +101,8 @@ pub async fn purge_old_packages(
                 updated_at: row.updated_at,
             },
         )
-    }).collect::<Vec<_>>();
+    })
+    .collect::<Vec<_>>();
 
     log::info!("{} packages marked for deletion", expired_pkgs.len());
 
@@ -110,7 +114,12 @@ pub async fn purge_old_packages(
             filename: cached_package.filename.clone(),
         };
         delete_cached_file(&cache_root, &disk_entry)?;
-        sqlx::query!("delete from cached_packages where id = ?", cached_package.id).execute(&mut *conn).await?;
+        sqlx::query!(
+            "delete from cached_packages where id = ?",
+            cached_package.id
+        )
+        .execute(&mut *conn)
+        .await?;
     }
 
     Ok(())

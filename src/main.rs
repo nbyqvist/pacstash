@@ -14,7 +14,7 @@ use std::sync::Arc;
 
 use actix_web::{get, middleware::Logger, web::Data, App, HttpServer, Responder};
 use config::Config;
-use handler::{caching_package_endpoint, statistics_page};
+use handler::{caching_package_endpoint, purge_expired_packages, statistics_page};
 use sqlx::sqlite::SqlitePoolOptions;
 use state::AppStateStruct;
 
@@ -40,6 +40,7 @@ async fn main() -> anyhow::Result<()> {
             .wrap(Logger::default())
             .service(statistics_page)
             .service(caching_package_endpoint)
+            .service(purge_expired_packages)
             .app_data(Data::new(pool.clone()))
             .app_data(Data::new(Arc::new(AppStateStruct {
                 cache_root: cfg.cache_root.clone(),
