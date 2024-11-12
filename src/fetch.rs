@@ -4,12 +4,12 @@ use reqwest::StatusCode;
 
 pub struct MirrorPackageFetch {
     pub mirror_id: i64,
-    pub tried_mirrors: Vec<i64>,
+    // pub tried_mirrors: Vec<i64>,
     pub package: Vec<u8>,
 }
 
 pub async fn fetch_package(mirrors: Vec<UpstreamMirror>, arch: &String, repo: &String, filename: &String) -> anyhow::Result<MirrorPackageFetch> {
-    let mut tried_mirror_ids = vec![];
+    // let mut tried_mirror_ids = vec![];
     log::info!("Fetching {repo}/{arch}/{filename}");
     for mirror in mirrors.iter() {
         log::info!("Trying mirror {}", mirror.url);
@@ -24,7 +24,7 @@ pub async fn fetch_package(mirrors: Vec<UpstreamMirror>, arch: &String, repo: &S
                 log::info!("Got package {} from mirror {}", filename, mirror.url);
                 return Ok(MirrorPackageFetch{
                     mirror_id: mirror.id,
-                    tried_mirrors: tried_mirror_ids.clone(),
+                    // tried_mirrors: tried_mirror_ids.clone(),
                     package: package.to_vec(),
                 })
                 } else {
@@ -36,7 +36,7 @@ pub async fn fetch_package(mirrors: Vec<UpstreamMirror>, arch: &String, repo: &S
             Err(e) => {
                 // Don't return yet, try next mirror
                 log::warn!("Mirror {} failed to return package!", mirror.url);
-                tried_mirror_ids.push(mirror.id);
+                // tried_mirror_ids.push(mirror.id);
                 println!("Fetch error: {}. URL: {}", e, url);
             }
         }

@@ -6,6 +6,7 @@ use actix_web::{
     web::{Data, Path},
     HttpResponseBuilder, Responder,
 };
+use rand::{seq::SliceRandom, thread_rng};
 use sqlx::SqlitePool;
 
 use crate::{
@@ -41,7 +42,9 @@ pub async fn caching_package_endpoint(
 
     if !should_cache_file(&filename) {
         log::info!("Not caching filename {}", filename);
-        let mirrors = get_mirrors_for_upstream_id(&mut conn, upstream.id).await?;
+        let mut mirrors = get_mirrors_for_upstream_id(&mut conn, upstream.id).await?;
+        let mut rand = thread_rng();
+        mirrors.shuffle(&mut rand); 
         let file = fetch_package(mirrors, &arch, &repo, &filename).await?;
         // Todo: use file.tried_mirrors and file.mirror_id for status
         return Ok(HttpResponseBuilder::new(http::StatusCode::OK)
@@ -64,7 +67,9 @@ pub async fn caching_package_endpoint(
     let Some(cached_pkg) = maybe_cached_file else {
         log::info!("File {} not cached!", filename);
         // Cache miss fetch upstream
-        let mirrors = get_mirrors_for_upstream_id(&mut conn, upstream.id).await?;
+        let mut mirrors = get_mirrors_for_upstream_id(&mut conn, upstream.id).await?;
+        let mut rand = thread_rng();
+        mirrors.shuffle(&mut rand); 
         let file = fetch_package(mirrors, &arch, &repo, &filename).await?;
         write_cached_file(cache_root, DiskCacheEntry{
             upstream_name: upstream.name,

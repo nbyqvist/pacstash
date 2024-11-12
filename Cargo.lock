@@ -1509,6 +1509,7 @@ dependencies = [
  "askama_actix",
  "env_logger",
  "log",
+ "rand",
  "reqwest",
  "sqlx",
  "tokio",
