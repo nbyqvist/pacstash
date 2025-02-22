@@ -1,0 +1,20 @@
+[Unit]
+Description=Linux package manager caching reverse proxy
+
+[Service]
+WorkingDirectory=/usr/local/pacstash
+Environment=WEB_PORT=3000
+Environment=WEB_HOST=0.0.0.0
+Environment=CACHE_ROOT=/var/cache/pacstash/
+Environment=DATABASE_URL=sqlite:/usr/local/pacstash/dev.db
+Environment=PACKAGE_MAX_AGE_SECONDS=2592000
+Environment=RUST_LOG=debug
+ReadWritePaths=/usr/local/pacstash
+ExecStart=/usr/local/pacstash/pacstash
+ProtectHome=true
+PrivateUsers=true
+PrivateTmp=true
+User=pacstash
+
+[Install]
+WantedBy=multi-user.target
