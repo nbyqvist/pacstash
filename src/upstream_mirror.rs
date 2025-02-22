@@ -1,6 +1,7 @@
+use serde::{Deserialize, Serialize};
 use sqlx::{prelude::FromRow, SqliteConnection};
 
-#[derive(FromRow)]
+#[derive(FromRow, Serialize, Deserialize)]
 pub struct UpstreamMirror {
     pub id: i64,
     pub upstream_id: i64,

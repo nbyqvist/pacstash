@@ -1,89 +1,30 @@
 use std::fs;
-
 use actix_web::{
-    get,
+    HttpResponseBuilder, Responder, get,
     http::{self, header},
-    post,
     web::{Data, Path},
-    HttpResponseBuilder, Responder,
 };
 use rand::{seq::SliceRandom, thread_rng};
 use sqlx::SqlitePool;
-
 use crate::{
     cached_package::{
-        cache_package_to_disk_entry, create_cached_package, find_cached_package,
-        purge_old_packages, CachedPackageFull, CachedPackageIdentifier,
+        CachedPackageIdentifier, cache_package_to_disk_entry, create_cached_package,
+        find_cached_package,
     },
-    disk_cache::{path_of_cached_package, write_cached_file, DiskCacheEntry},
+    disk_cache::{DiskCacheEntry, path_of_cached_package, write_cached_file},
     error::ApplicationError,
     fetch::fetch_package,
-    response::AppResponse,
     state::AppState,
-    statistics::fetch_statistics,
-    templates::{NotFoundTemplate, RepoViewTemplate, StatisticsTemplate},
     upstream::find_upstream_by_name,
     upstream_mirror::{get_mirrors_for_upstream_id, should_cache_file},
 };
-
-pub async fn not_found_page(_: Data<AppState>) -> impl Responder {
-    NotFoundTemplate {}
-}
-
-#[get("/")]
-pub async fn statistics_page(pool: Data<SqlitePool>) -> impl Responder {
-    let mut conn = pool.acquire().await.ok().unwrap();
-    let stats = fetch_statistics(&mut conn).await.ok().unwrap();
-    StatisticsTemplate { stats }
-}
-
-#[get("/repo/{repo_name}")]
-pub async fn view_repo_page(path: Path<String>, pool: Data<SqlitePool>) -> impl Responder {
-    let repo_name = path.into_inner();
-    let conn_res = pool.acquire().await;
-    if conn_res.is_err() {
-        return RepoViewTemplate {
-            repo_name,
-            packages: Err("Failed to acquire connection".to_string()),
-        };
-    }
-    let mut conn = conn_res.unwrap();
-    let packages = sqlx::query_as!(
-        CachedPackageFull,
-        "
-        select
-            c.id,
-            c.upstream_id,
-            c.repo,
-            c.arch,
-            c.filename,
-            c.upstream_mirror_id,
-            c.download_count,
-            c.last_downloaded_at,
-            c.created_at,
-            c.updated_at
-        from upstreams u
-        join cached_packages c
-            on c.upstream_id = u.id
-        where u.name = ?
-        order by c.repo, c.arch, c.filename
-        ",
-        repo_name
-    )
-    .fetch_all(conn.as_mut())
-    .await;
-    RepoViewTemplate {
-        repo_name,
-        packages: packages.map_err(|e| e.to_string()),
-    }
-}
 
 #[get("/u/{upstream_name}/{repo}/{arch}/{filename}")]
 pub async fn caching_package_endpoint(
     path: Path<(String, String, String, String)>,
     pool: Data<SqlitePool>,
     app_state: Data<AppState>,
-) -> AppResponse {
+) -> Result<impl Responder, ApplicationError> {
     let cache_root = app_state.into_inner().cache_root.clone();
     let (upstream_name, repo, arch, filename) = path.into_inner();
     let mut conn = pool.acquire().await?;
@@ -152,14 +93,4 @@ pub async fn caching_package_endpoint(
             header::HeaderValue::from_static("application/octet-stream"),
         ))
         .body(content))
-}
-
-#[post("/rpc/expire_cache")]
-pub async fn purge_expired_packages(
-    pool: Data<SqlitePool>,
-    app_state: Data<AppState>,
-) -> AppResponse {
-    let mut conn = pool.acquire().await?;
-    purge_old_packages(&mut conn, app_state).await?;
-    Ok(HttpResponseBuilder::new(http::StatusCode::OK).finish())
 }

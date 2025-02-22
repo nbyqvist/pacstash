@@ -1,10 +1,11 @@
+#![feature(type_alias_impl_trait)]
+
 mod cached_package;
 mod config;
 mod disk_cache;
 mod error;
 mod fetch;
-mod handler;
-mod response;
+mod routes;
 mod state;
 mod statistics;
 mod templates;
@@ -15,17 +16,9 @@ use std::sync::Arc;
 
 use actix_web::{App, HttpServer, Responder, get, middleware::Logger, web::Data};
 use config::Config;
-use handler::{
-    caching_package_endpoint, not_found_page, purge_expired_packages, statistics_page,
-    view_repo_page,
-};
+use routes::{caching_package_endpoint, get_mirrors_for_upstream, not_found_page, purge_expired_packages, statistics_page, view_repo_page};
 use sqlx::sqlite::SqlitePoolOptions;
 use state::AppStateStruct;
-
-#[get("/")]
-async fn stub() -> impl Responder {
-    "Pacstash, this will return stats eventually".to_string()
-}
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -46,6 +39,7 @@ async fn main() -> anyhow::Result<()> {
             .service(view_repo_page)
             .service(caching_package_endpoint)
             .service(purge_expired_packages)
+            .service(get_mirrors_for_upstream)
             .app_data(Data::new(pool.clone()))
             .app_data(Data::new(Arc::new(AppStateStruct {
                 cache_root: cfg.cache_root.clone(),
