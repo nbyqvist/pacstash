@@ -20,7 +20,8 @@ pub async fn fetch_package(
         log::info!("Trying mirror {}", mirror.url);
         let mirror_base_url = substitute_url_params(mirror.url.clone(), arch.clone(), repo.clone());
         let url = format!("{}/{}", mirror_base_url, filename);
-        let package = reqwest::get(url.clone()).await;
+        let client = reqwest::ClientBuilder::new().connect_timeout(std::time::Duration::from_secs(5)).build()?;
+        let package = client.get(url.clone()).send().await;
         match package {
             Ok(response) => {
                 let status = response.status();
