@@ -1,0 +1,38 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ repo_name }}{% endblock title %}
+
+{% block content %}
+<h1>{{ repo_name }}</h1>
+{% match packages %}
+{% when Ok with (pkgs) %}
+<table>
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Repo</th>
+            <th>Arch</th>
+            <th>Filename</th>
+            <th>Last Download</th>
+            <th>Created</th>
+            <th>Updated</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for package in pkgs %}
+        <tr>
+            <td>{{ package.id }}</td>
+            <td>{{ package.repo }}</td>
+            <td>{{ package.arch }}</td>
+            <td>{{ package.filename }}</td>
+            <td class="date-number">{{ package.last_downloaded_at.unwrap_or(0) }}</td>
+            <td class="date-number">{{ package.created_at }}</td>
+            <td class="date-number">{{ package.updated_at.unwrap_or(0) }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% when Err with (error_message) %}
+<p>{{ error_message }}</p>
+{% endmatch %}
+{% endblock content %}

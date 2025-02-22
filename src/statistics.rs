@@ -1,15 +1,8 @@
-use askama_actix::Template;
 use sqlx::SqliteConnection;
 
-#[derive(Template)]
-#[template(path = "statistics.html")]
-pub struct StatisticsTemplate {
-    pub stats: Vec<PackageCounts>,
-}
-
 pub struct PackageCounts {
-    upstream_name: String,
-    package_count: i64,
+    pub upstream_name: String,
+    pub package_count: i64,
 }
 
 pub async fn fetch_statistics(conn: &mut SqliteConnection) -> anyhow::Result<Vec<PackageCounts>> {

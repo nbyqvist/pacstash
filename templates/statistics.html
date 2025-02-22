@@ -1,19 +1,14 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <title>Pacstash - Stats</title>
-</head>
-<body>
-    <main>
-        <h1>Package count</h1>
-        <ul>
-            {% for stat in stats %}
-                <li>
-                    {{ stat.upstream_name }}: ({{stat.package_count}})
-                </li>
-            {% endfor %}
-        </ul>
-    </main>
-</body>
-</html>
+{% extends "layout.html" %}
+
+{% block title %}Statistics{% endblock title %}
+
+{% block content %}
+<h1>Package count</h1>
+<ul>
+    {% for stat in stats %}
+    <li>
+        <a href="/repo/{{ stat.upstream_name }}">{{ stat.upstream_name }}: ({{stat.package_count}})</a>
+    </li>
+    {% endfor %}
+</ul>
+{% endblock content %}

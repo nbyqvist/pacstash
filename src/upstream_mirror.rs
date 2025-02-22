@@ -19,7 +19,7 @@ pub async fn get_mirrors_for_upstream_id(
     Ok(mirrors)
 }
 
-pub fn should_cache_file(file: &String) -> bool {
+pub fn should_cache_file(file: &str) -> bool {
     !(file.ends_with(".sig") || file.ends_with(".db"))
 }
 

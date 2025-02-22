@@ -7,14 +7,18 @@ mod handler;
 mod response;
 mod state;
 mod statistics;
+mod templates;
 mod upstream;
 mod upstream_mirror;
 
 use std::sync::Arc;
 
-use actix_web::{get, middleware::Logger, web::Data, App, HttpServer, Responder};
+use actix_web::{App, HttpServer, Responder, get, middleware::Logger, web::Data};
 use config::Config;
-use handler::{caching_package_endpoint, purge_expired_packages, statistics_page};
+use handler::{
+    caching_package_endpoint, not_found_page, purge_expired_packages, statistics_page,
+    view_repo_page,
+};
 use sqlx::sqlite::SqlitePoolOptions;
 use state::AppStateStruct;
 
@@ -39,6 +43,7 @@ async fn main() -> anyhow::Result<()> {
         App::new()
             .wrap(Logger::default())
             .service(statistics_page)
+            .service(view_repo_page)
             .service(caching_package_endpoint)
             .service(purge_expired_packages)
             .app_data(Data::new(pool.clone()))
@@ -46,6 +51,7 @@ async fn main() -> anyhow::Result<()> {
                 cache_root: cfg.cache_root.clone(),
                 pkg_max_age: cfg.pkg_max_age,
             })))
+            .default_service(actix_web::web::route().to(not_found_page))
     })
     .bind((cfg.web_host, cfg.web_port))
     .expect("Could not bind address")

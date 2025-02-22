@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Pacstash - {% block title%}Home{% endblock title %}</title>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const dateNumbers = document.querySelectorAll('.date-number');
+            dateNumbers.forEach((el) => {
+                const n = parseInt(el.innerHTML.trim()) * 1000;
+                if (n === 0) {
+                    el.textContent = '';
+                    return;
+                }
+                el.textContent = new Date(n).toLocaleString();
+            });
+        });
+    </script>
+</head>
+<body>
+    <main>
+        {% block content %}{% endblock content %}
+    </main>
+</body>
+</html>

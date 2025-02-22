@@ -18,6 +18,20 @@ pub struct CachedPackage {
     pub updated_at: Option<i64>,
 }
 
+#[derive(FromRow)]
+pub struct CachedPackageFull {
+    pub id: i64,
+    pub upstream_id: i64,
+    pub repo: String,
+    pub arch: String,
+    pub filename: String,
+    pub upstream_mirror_id: i64,
+    pub download_count: i64,
+    pub last_downloaded_at: Option<i64>,
+    pub created_at: i64,
+    pub updated_at: Option<i64>,
+}
+
 pub fn cache_package_to_disk_entry(
     upstream_name: String,
     cached_package: CachedPackage,
