@@ -14,7 +14,7 @@ mod upstream_mirror;
 
 use std::sync::Arc;
 
-use actix_web::{App, HttpServer, Responder, get, middleware::Logger, web::Data};
+use actix_web::{App, HttpServer, middleware::Logger, web::Data};
 use config::Config;
 use routes::{caching_package_endpoint, get_mirrors_for_upstream, not_found_page, purge_expired_packages, statistics_page, view_repo_page};
 use sqlx::sqlite::SqlitePoolOptions;
