@@ -4,7 +4,6 @@ use reqwest::StatusCode;
 
 pub struct MirrorPackageFetch {
     pub mirror_id: i64,
-    // pub tried_mirrors: Vec<i64>,
     pub package: Vec<u8>,
 }
 
@@ -14,7 +13,6 @@ pub async fn fetch_package(
     repo: &String,
     filename: &String,
 ) -> anyhow::Result<MirrorPackageFetch> {
-    // let mut tried_mirror_ids = vec![];
     log::info!("Fetching {repo}/{arch}/{filename}");
     for mirror in mirrors.iter() {
         log::info!("Trying mirror {}", mirror.url);

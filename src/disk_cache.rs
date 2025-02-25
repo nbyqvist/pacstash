@@ -30,7 +30,7 @@ pub fn path_of_cached_package(cache_root: &String, entry: &DiskCacheEntry) -> St
 
 pub fn write_cached_file(
     cache_root: String,
-    entry: DiskCacheEntry,
+    entry: &DiskCacheEntry,
     content: &Vec<u8>,
 ) -> anyhow::Result<()> {
     log::info!("Storing file {}", entry.filename);

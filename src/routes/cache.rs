@@ -1,4 +1,3 @@
-use std::fs;
 use actix_web::{
     HttpResponseBuilder, Responder, get,
     http::{self, header},
@@ -8,10 +7,9 @@ use rand::{seq::SliceRandom, thread_rng};
 use sqlx::SqlitePool;
 use crate::{
     cached_package::{
-        CachedPackageIdentifier, cache_package_to_disk_entry, create_cached_package,
-        find_cached_package,
+        cache_package_to_disk_entry, create_cached_package, find_cached_package, CachedPackageIdentifier
     },
-    disk_cache::{DiskCacheEntry, path_of_cached_package, write_cached_file},
+    disk_cache::{path_of_cached_package, write_cached_file, DiskCacheEntry},
     error::ApplicationError,
     fetch::fetch_package,
     state::AppState,
@@ -68,29 +66,33 @@ pub async fn caching_package_endpoint(
         let mut rand = thread_rng();
         mirrors.shuffle(&mut rand);
         let file = fetch_package(mirrors, &arch, &repo, &filename).await?;
+        let entry =DiskCacheEntry {
+            upstream_name: upstream.name,
+            repo: repo.clone(),
+            arch,
+            filename,
+        };
         write_cached_file(
             cache_root,
-            DiskCacheEntry {
-                upstream_name: upstream.name,
-                repo: repo.clone(),
-                arch,
-                filename,
-            },
+            &entry,
             &file.package,
         )?;
         let _created_id = create_cached_package(conn, package_ident, file.mirror_id).await?;
-        return Ok(HttpResponseBuilder::new(http::StatusCode::OK).body(file.package));
+        let relative_path = path_of_cached_package(&"/privatefiles".to_string(), &entry);
+
+        return Ok(HttpResponseBuilder::new(http::StatusCode::OK)
+            .insert_header((
+                "X-Accel-Redirect",
+                header::HeaderValue::from_str(&relative_path).unwrap(),
+            )).finish());
     };
 
     log::info!("Cache hit {filename}");
     let entry = cache_package_to_disk_entry(upstream.name, cached_pkg);
-    let pkg_path = path_of_cached_package(&cache_root, &entry);
-    let content = fs::read(std::path::Path::new(&pkg_path))
-        .map_err(|e| anyhow::anyhow!(format!("{:?}", e)))?;
+    let relative_path: String = path_of_cached_package(&"/privatefiles".to_string(), &entry);
     Ok(HttpResponseBuilder::new(http::StatusCode::OK)
         .insert_header((
-            header::CONTENT_TYPE,
-            header::HeaderValue::from_static("application/octet-stream"),
-        ))
-        .body(content))
+            "X-Accel-Redirect",
+            header::HeaderValue::from_str(&relative_path).unwrap(),
+        )).finish())
 }

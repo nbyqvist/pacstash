@@ -1511,7 +1511,7 @@ checksum = "945462a4b81e43c4e3ba96bd7b49d834c6f61198356aa858733bc4acf3cbe62e"
 
 [[package]]
 name = "pacstash"
-version = "0.0.2"
+version = "0.0.3"
 dependencies = [
  "actix-web",
  "anyhow",
